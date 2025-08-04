@@ -1,0 +1,5 @@
+Flask
+sentence-transformers
+torch
+openai
+python-dotenv

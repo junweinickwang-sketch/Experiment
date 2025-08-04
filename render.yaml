@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: fake-search-experiment
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: "python app.py"
