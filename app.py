@@ -30,11 +30,8 @@ page_embeddings = model.encode(page_contents, convert_to_tensor=True)
 
 def get_overview_with_gpt(pages_text):
     prompt = (
-        "You are an AI assistant that summarizes search results.
-"
-        "Given the following articles, summarize them into a concise and objective paragraph.
-
-"
+        "You are an AI assistant that summarizes search results."
+        "Given the following articles, summarize them into a concise and objective paragraph."
         f"{pages_text}
 
 "
