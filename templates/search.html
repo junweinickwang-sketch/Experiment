@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fake Search</title>
+</head>
+<body>
+    <h1>Fake Search Engine</h1>
+    <form method="POST" action="/search">
+        <input type="hidden" name="uid" value="{{ uid }}">
+        <input type="text" name="query" placeholder="Enter your search query..." required>
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>

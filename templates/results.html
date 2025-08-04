@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+    <script>
+        let startTime = Date.now();
+
+        function logClick(target) {
+            fetch("/log_click", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    uid: "{{ uid }}",
+                    target: target,
+                    timestamp: Date.now()
+                })
+            });
+        }
+
+        window.addEventListener("beforeunload", function () {
+            fetch("/log_stay", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    uid: "{{ uid }}",
+                    page: window.location.pathname,
+                    duration: Date.now() - startTime
+                })
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>AI Overview</h1>
+    <p>{{ overview }}</p>
+
+    <h2>Search Results</h2>
+    <ul>
+        {% for file, score in results %}
+        <li>
+            <a href="{{ url_for('static', filename='../webpages/' + file) }}" onclick="logClick('{{ file }}')" target="_blank">
+                {{ file }} (score: {{ '%.2f'|format(score) }})
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
