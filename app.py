@@ -7,7 +7,7 @@ from sentence_transformers import SentenceTransformer, util
 from openai import OpenAI
 
 # ---- 硬编码 API KEY（可选：你也可以继续用环境变量） ----
-client = OpenAI(api_key="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")  # ⚠️ 记得换成你自己的
+client = OpenAI(api_key="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")  # ⚠️ 记得换成你自己的
 
 # ---- 初始化 ----
 app = Flask(__name__)
