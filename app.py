@@ -7,7 +7,7 @@ from sentence_transformers import SentenceTransformer, util
 import google.generativeai as genai
 
 # ---- Gemini API KEY ----
-genai.configure(api_key="AIzaSyBSdiz1d5uUU_I-dHJK9LsiODGySnSE6Kk")  # 替换成你自己的 key
+genai.configure(api_key="123)  # 替换成你自己的 key
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # ---- 初始化 ----
