@@ -7,6 +7,7 @@ from flask import Flask, request, render_template, redirect, url_for, make_respo
 from sentence_transformers import SentenceTransformer, util
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -16,6 +17,7 @@ app = Flask(__name__)
 WEBPAGE_DIR = "webpages"
 webpages = []
 page_contents = []
+
 for filename in os.listdir(WEBPAGE_DIR):
     if filename.endswith(".html"):
         path = os.path.join(WEBPAGE_DIR, filename)
@@ -29,14 +31,13 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 page_embeddings = model.encode(page_contents, convert_to_tensor=True)
 
 def get_overview_with_gpt(pages_text):
-    prompt = (
-        "You are an AI assistant that summarizes search results."
-        "Given the following articles, summarize them into a concise and objective paragraph."
-        f"{pages_text}
+    prompt = f"""You are an AI assistant that summarizes search results.
+Given the following articles, summarize them into a concise and objective paragraph.
 
-"
-        "Summary:"
-    )
+{pages_text}
+
+Summary:"""
+
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
@@ -60,9 +61,7 @@ def search():
     scores = util.cos_sim(query_embedding, page_embeddings)[0].cpu().numpy()
     top_indices = np.argsort(scores)[::-1][:10]
     results = [(webpages[i][0], scores[i]) for i in top_indices]
-    selected_texts = "
-
-".join([page_contents[i] for i in top_indices])
+    selected_texts = "\n\n".join([page_contents[i] for i in top_indices])
     overview = get_overview_with_gpt(selected_texts)
     return render_template("results.html", results=results, overview=overview, uid=uid, query=query)
 
@@ -84,4 +83,6 @@ def log_stay():
         writer.writerow([data["uid"], data["page"], data["duration"]])
     return "", 204
 
-
+# Entry point for Render
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
