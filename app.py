@@ -84,5 +84,4 @@ def log_stay():
         writer.writerow([data["uid"], data["page"], data["duration"]])
     return "", 204
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
