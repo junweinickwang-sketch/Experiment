@@ -4,15 +4,16 @@ import time
 import numpy as np
 from flask import Flask, request, render_template, make_response, jsonify
 from sentence_transformers import SentenceTransformer, util
-from openai import OpenAI
+import google.generativeai as genai
 
-# ---- 硬编码 API KEY（可选：你也可以继续用环境变量） ----
-client = OpenAI(api_key="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")  # ⚠️ 记得换成你自己的
+# ---- Gemini API KEY ----
+genai.configure(api_key="AIzaSyBSdiz1d5uUU_I-dHJK9LsiODGySnSE6Kk")  # 替换成你自己的 key
+model = genai.GenerativeModel("gemini-pro")
 
 # ---- 初始化 ----
 app = Flask(__name__)
 WEBPAGE_DIR = "webpages"
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model_embed = SentenceTransformer("all-MiniLM-L6-v2")
 
 # ---- 加载网页内容 ----
 webpages, page_contents = [], []
@@ -23,9 +24,9 @@ for filename in os.listdir(WEBPAGE_DIR):
             content = f.read()
             webpages.append((filename, content))
             page_contents.append(content)
-page_embeddings = model.encode(page_contents, convert_to_tensor=True)
+page_embeddings = model_embed.encode(page_contents, convert_to_tensor=True)
 
-# ---- GPT Summarizer ----
+# ---- Gemini 摘要函数 ----
 def get_overview_with_gpt(pages_text):
     prompt = f"""You are an AI assistant that summarizes search results.
 Given the following articles, summarize them into a concise and objective paragraph.
@@ -33,14 +34,8 @@ Given the following articles, summarize them into a concise and objective paragr
 {pages_text}
 
 Summary:"""
-
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
-        max_tokens=300
-    )
-    return response.choices[0].message.content.strip()
+    response = model.generate_content(prompt)
+    return response.text.strip()
 
 # ---- 路由 ----
 @app.route("/")
@@ -54,7 +49,7 @@ def home():
 def search():
     query = request.form["query"]
     uid = request.form["uid"]
-    query_embedding = model.encode(query, convert_to_tensor=True)
+    query_embedding = model_embed.encode(query, convert_to_tensor=True)
     scores = util.cos_sim(query_embedding, page_embeddings)[0].cpu().numpy()
     top_indices = np.argsort(scores)[::-1][:10]
     results = [(webpages[i][0], scores[i]) for i in top_indices]
