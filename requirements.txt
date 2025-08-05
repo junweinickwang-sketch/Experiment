@@ -4,3 +4,4 @@ sentence-transformers==2.2.2
 huggingface_hub==0.10.1
 numpy==1.24.4
 python-dotenv==1.0.1
+google-generativeai
