@@ -1,6 +1,5 @@
 import os
 import csv
-import time
 import numpy as np
 from flask import Flask, request, render_template, make_response, jsonify
 from sentence_transformers import SentenceTransformer, util
@@ -8,33 +7,38 @@ import google.generativeai as genai
 from bs4 import BeautifulSoup
 
 # ---- Gemini API KEY ----
-genai.configure(api_key="AIzaSyBSdiz1d5uUU_I-dHJK9LsiODGySnSE6Kk") # Replaced with your key
+genai.configure(api_key="AIzaSyBSdiz1d5uUU_I-dHJK9LsiODGySnSE6Kk")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # ---- Initialization ----
-app = Flask(__name__)
+app = Flask(__name__, static_folder='webpages')
 WEBPAGE_DIR = "webpages"
 model_embed = SentenceTransformer("all-MiniLM-L6-v2")
 
 # ---- Function to extract a preview from HTML content ----
 def get_preview_from_html(html_content, length=200):
     soup = BeautifulSoup(html_content, 'html.parser')
-    # Get all text from the body, stripping out script and style tags
     text = soup.body.get_text(separator=' ', strip=True)
-    # Truncate the text to a specified length and add an ellipsis
     return text[:length] + '...' if len(text) > length else text
 
 # ---- Load webpage content ----
-webpages, page_contents, page_previews = [], [], []
-for filename in os.listdir(WEBPAGE_DIR):
-    if filename.endswith(".html"):
-        path = os.path.join(WEBPAGE_DIR, filename)
-        with open(path, "r", encoding="utf-8") as f:
-            content = f.read()
+webpages, page_contents, page_previews, page_titles = [], [], [], []
+page_embeddings = None
+if os.path.exists(WEBPAGE_DIR) and os.listdir(WEBPAGE_DIR):
+    for filename in os.listdir(WEBPAGE_DIR):
+        if filename.endswith(".html"):
+            path = os.path.join(WEBPAGE_DIR, filename)
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+            soup = BeautifulSoup(content, 'html.parser')
+            title = soup.title.string.strip() if soup.title else filename
+            preview = get_preview_from_html(content)
             webpages.append(filename)
             page_contents.append(content)
-            page_previews.append(get_preview_from_html(content))
-page_embeddings = model_embed.encode(page_contents, convert_to_tensor=True)
+            page_previews.append(preview)
+            page_titles.append(title)
+    if page_contents:
+        page_embeddings = model_embed.encode(page_contents, convert_to_tensor=True)
 
 # ---- Gemini Summary Function ----
 def get_overview_with_gemini(pages_text):
@@ -44,8 +48,12 @@ Given the following articles, summarize them into a concise and objective paragr
 {pages_text}
 
 Summary:"""
-    response = model.generate_content(prompt)
-    return response.text.strip()
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"Error generating Gemini overview: {e}")
+        return "Sorry, I couldn't generate a summary for these results."
 
 # ---- Routes ----
 @app.route("/")
@@ -59,19 +67,27 @@ def home():
 def search():
     query = request.form["query"]
     uid = request.form["uid"]
-    query_embedding = model_embed.encode(query, convert_to_tensor=True)
-    scores = util.cos_sim(query_embedding, page_embeddings)[0].cpu().numpy()
-    top_indices = np.argsort(scores)[::-1][:10]
     
-    # Updated results to include the filename and preview, but not the score
-    results = [
-        {"filename": webpages[i], "preview": page_previews[i]} 
-        for i in top_indices
-    ]
-    
-    selected_texts = "\n\n".join([page_contents[i] for i in top_indices])
-    overview = get_overview_with_gemini(selected_texts)
-    
+    if not page_embeddings is None:
+        query_embedding = model_embed.encode(query, convert_to_tensor=True)
+        scores = util.cos_sim(query_embedding, page_embeddings)[0].cpu().numpy()
+        top_indices = np.argsort(scores)[::-1][:10]
+        
+        results = [
+            {
+                "filename": webpages[i],
+                "preview": page_previews[i],
+                "title": page_titles[i]
+            }
+            for i in top_indices
+        ]
+        
+        selected_texts = "\n\n".join([page_contents[i] for i in top_indices])
+        overview = get_overview_with_gemini(selected_texts)
+    else:
+        results = []
+        overview = "No webpages found to search."
+        
     return render_template("results.html", results=results, overview=overview, uid=uid, query=query)
 
 @app.route("/log_click", methods=["POST"])
@@ -94,4 +110,4 @@ def log_stay():
 
 # ---- Start ----
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5050)))
