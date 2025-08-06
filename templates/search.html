@@ -2,14 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fake Search</title>
+    <title>Fake Google</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #4285f4;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            justify-content: center;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357ae8;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
-    <h1>Fake Search Engine</h1>
+    <h1>Fake Google</h1>
     <form method="POST" action="/search">
         <input type="hidden" name="uid" value="{{ uid }}">
         <input type="text" name="query" placeholder="Enter your search query..." required>
         <button type="submit">Search</button>
     </form>
+    <div class="footer">A fake search interface for educational or research use</div>
 </body>
 </html>
