@@ -5,29 +5,39 @@ import numpy as np
 from flask import Flask, request, render_template, make_response, jsonify
 from sentence_transformers import SentenceTransformer, util
 import google.generativeai as genai
+from bs4 import BeautifulSoup
 
 # ---- Gemini API KEY ----
-genai.configure(api_key="123)  # 替换成你自己的 key
+genai.configure(api_key="AIzaSyBSdiz1d5uUU_I-dHJK9LsiODGySnSE6Kk") # Replaced with your key
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-# ---- 初始化 ----
+# ---- Initialization ----
 app = Flask(__name__)
 WEBPAGE_DIR = "webpages"
 model_embed = SentenceTransformer("all-MiniLM-L6-v2")
 
-# ---- 加载网页内容 ----
-webpages, page_contents = [], []
+# ---- Function to extract a preview from HTML content ----
+def get_preview_from_html(html_content, length=200):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    # Get all text from the body, stripping out script and style tags
+    text = soup.body.get_text(separator=' ', strip=True)
+    # Truncate the text to a specified length and add an ellipsis
+    return text[:length] + '...' if len(text) > length else text
+
+# ---- Load webpage content ----
+webpages, page_contents, page_previews = [], [], []
 for filename in os.listdir(WEBPAGE_DIR):
     if filename.endswith(".html"):
         path = os.path.join(WEBPAGE_DIR, filename)
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
-            webpages.append((filename, content))
+            webpages.append(filename)
             page_contents.append(content)
+            page_previews.append(get_preview_from_html(content))
 page_embeddings = model_embed.encode(page_contents, convert_to_tensor=True)
 
-# ---- Gemini 摘要函数 ----
-def get_overview_with_gpt(pages_text):
+# ---- Gemini Summary Function ----
+def get_overview_with_gemini(pages_text):
     prompt = f"""You are an AI assistant that summarizes search results.
 Given the following articles, summarize them into a concise and objective paragraph.
 
@@ -37,7 +47,7 @@ Summary:"""
     response = model.generate_content(prompt)
     return response.text.strip()
 
-# ---- 路由 ----
+# ---- Routes ----
 @app.route("/")
 def home():
     uid = request.args.get("uid", "anonymous")
@@ -52,9 +62,16 @@ def search():
     query_embedding = model_embed.encode(query, convert_to_tensor=True)
     scores = util.cos_sim(query_embedding, page_embeddings)[0].cpu().numpy()
     top_indices = np.argsort(scores)[::-1][:10]
-    results = [(webpages[i][0], scores[i]) for i in top_indices]
+    
+    # Updated results to include the filename and preview, but not the score
+    results = [
+        {"filename": webpages[i], "preview": page_previews[i]} 
+        for i in top_indices
+    ]
+    
     selected_texts = "\n\n".join([page_contents[i] for i in top_indices])
-    overview = get_overview_with_gpt(selected_texts)
+    overview = get_overview_with_gemini(selected_texts)
+    
     return render_template("results.html", results=results, overview=overview, uid=uid, query=query)
 
 @app.route("/log_click", methods=["POST"])
@@ -75,6 +92,6 @@ def log_stay():
         writer.writerow([data["uid"], data["page"], data["duration"]])
     return "", 204
 
-# ---- 启动 ----
+# ---- Start ----
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
