@@ -1,74 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Fake Google</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索引擎</title>
     <style>
         body {
-            background-color: #f8f9fa;
             font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 50px 20px;
+            background-color: #f5f5f5;
+        }
+        .user-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .search-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .search-form {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
         }
-
-        h1 {
-            font-size: 3rem;
-            color: #4285f4;
-            margin-bottom: 30px;
-        }
-
-        form {
-            display: flex;
-            width: 100%;
-            max-width: 600px;
-            justify-content: center;
-        }
-
         input[type="text"] {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: 1.2rem;
-            border: 1px solid #dfe1e5;
-            border-radius: 24px;
-            outline: none;
-            flex-grow: 1;
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
         }
-
         button {
-            margin-left: 10px;
-            padding: 12px 20px;
-            font-size: 1rem;
-            background-color: #4285f4;
+            padding: 12px 24px;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 24px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            font-size: 16px;
         }
-
         button:hover {
-            background-color: #357ae8;
+            background-color: #45a049;
         }
-
-        .footer {
-            position: absolute;
-            bottom: 20px;
-            font-size: 0.9rem;
-            color: #777;
+        .nav-links {
+            margin-top: 30px;
+        }
+        .nav-links a {
+            margin: 0 15px;
+            color: #666;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: #f0f0f0;
+            color: #4CAF50;
         }
     </style>
 </head>
 <body>
-    <h1>Fake Google</h1>
-    <form method="POST" action="/search">
-        <input type="hidden" name="uid" value="{{ uid }}">
-        <input type="text" name="query" placeholder="Enter your search query..." required>
-        <button type="submit">Search</button>
-    </form>
-    <div class="footer">A fake search interface for educational or research use</div>
+    <div class="user-info">
+        <strong>当前用户：</strong>{{ user.username }} | 
+        <strong>搜索次数：</strong>{{ user.search_count }}
+        <br><small>用户ID: {{ uid[:16] }}...</small>
+    </div>
+
+    <div class="search-container">
+        <h1>本地网页搜索引擎</h1>
+        <form class="search-form" action="/search" method="POST">
+            <input type="text" name="query" placeholder="输入搜索关键词..." required>
+            <button type="submit">搜索</button>
+        </form>
+        
+        <div class="nav-links">
+            <a href="/users">用户管理</a>
+            <a href="/logs">查看日志</a>
+            <a href="/webpage_stats">网页统计</a>
+        </div>
+    </div>
+
+    <script>
+        const uid = "{{ uid }}";
+        let startTime = Date.now();
+        let totalVisibleTime = 0;
+        let lastVisibleStart = Date.now();
+        let isPageVisible = !document.hidden;
+        let hasLoggedStay = false;
+
+        function updateVisibleTime() {
+            if (isPageVisible) {
+                const now = Date.now();
+                totalVisibleTime += (now - lastVisibleStart);
+                lastVisibleStart = now;
+            }
+        }
+
+        function logStay() {
+            if (hasLoggedStay) return;
+            
+            updateVisibleTime();
+            
+            if (totalVisibleTime < 1000) return; // 只记录可见时间超过1秒的
+            
+            hasLoggedStay = true;
+            
+            const data = {
+                uid: uid,
+                page: window.location.pathname,
+                duration: totalVisibleTime,
+                query: "",
+                timestamp: new Date().toISOString()
+            };
+
+            if (navigator.sendBeacon) {
+                const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+                navigator.sendBeacon("/log_stay", blob);
+            } else {
+                fetch("/log_stay", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data),
+                    keepalive: true
+                });
+            }
+        }
+
+        // 页面可见性变化
+        document.addEventListener("visibilitychange", function() {
+            const now = Date.now();
+            
+            if (document.hidden) {
+                if (isPageVisible) {
+                    totalVisibleTime += (now - lastVisibleStart);
+                    isPageVisible = false;
+                }
+            } else {
+                if (!isPageVisible) {
+                    lastVisibleStart = now;
+                    isPageVisible = true;
+                }
+            }
+        });
+
+        // 窗口焦点变化
+        window.addEventListener("focus", function() {
+            if (!isPageVisible && !document.hidden) {
+                lastVisibleStart = Date.now();
+                isPageVisible = true;
+            }
+        });
+
+        window.addEventListener("blur", function() {
+            if (isPageVisible) {
+                totalVisibleTime += (Date.now() - lastVisibleStart);
+                isPageVisible = false;
+            }
+        });
+
+        let isUnloading = false;
+        
+        window.addEventListener("beforeunload", function() {
+            if (!isUnloading) {
+                isUnloading = true;
+                logStay();
+            }
+        });
+
+        window.addEventListener("load", function() {
+            startTime = Date.now();
+            lastVisibleStart = Date.now();
+            isPageVisible = !document.hidden;
+        });
+    </script>
 </body>
 </html>

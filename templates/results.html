@@ -1,102 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ query }} - Search Results</title>
+    <title>搜索结果 - {{ query }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f8f9fa;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-        .search-header {
-            display: flex;
-            align-items: center;
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        h1 {
-            margin-left: 20px;
-            font-size: 2rem;
-            color: #4285f4;
+        .user-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
         .search-form {
             display: flex;
-            width: 500px;
-            margin-left: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
-        .search-form input[type="text"] {
-            flex-grow: 1;
-            border: 1px solid #dfe1e5;
-            border-radius: 24px;
-            padding: 10px 15px;
-            font-size: 1rem;
-            outline: none;
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
         }
-        .search-summary {
-            background-color: #e8f0fe;
-            border-left: 4px solid #4285f4;
-            padding: 15px;
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .back-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            color: #4CAF50;
+        }
+        .overview {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+            line-height: 1.6;
         }
-        .search-result {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .search-result h3 {
+        .overview h3 {
             margin-top: 0;
+            color: #2d5a2d;
+        }
+        .overview-content {
+            color: #333;
+        }
+        
+        /* Citation 样式 */
+        .citation {
+            display: inline;
+            margin-left: 2px;
+        }
+        .citation-link {
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 2px 4px;
+            background-color: rgba(26, 115, 232, 0.1);
+            border-radius: 3px;
+            margin: 0 1px;
+        }
+        .citation-link:hover {
+            background-color: rgba(26, 115, 232, 0.2);
+            text-decoration: underline;
+        }
+        
+        .results-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .result-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item:hover {
+            background-color: #f9f9f9;
+        }
+        .result-title {
+            color: #1a0dab;
+            font-size: 18px;
+            font-weight: bold;
             margin-bottom: 5px;
         }
-        .search-result a {
-            text-decoration: none;
-            color: #1a0dab;
-            font-size: 1.2rem;
+        .result-filename {
+            color: #006621;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .search-result p {
-            margin: 0;
-            color: #545454;
+        .result-score {
+            background-color: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+        .result-preview {
+            color: #666;
+            line-height: 1.4;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .stats {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="search-header">
-        <h1>Fake Google</h1>
-        <form class="search-form" action="{{ url_for('search') }}" method="post">
-            <input type="text" name="query" value="{{ query }}">
-            <input type="hidden" name="uid" value="{{ uid }}">
-            <button type="submit">🔍</button>
+    <div class="header">
+        <div class="user-info">
+            <strong>当前用户：</strong>{{ user.username }} | 
+            <strong>搜索次数：</strong>{{ user.search_count }}
+        </div>
+        
+        <form class="search-form" action="/search" method="POST">
+            <input type="text" name="query" value="{{ query }}" placeholder="输入搜索关键词..." required>
+            <button type="submit">搜索</button>
         </form>
+        <a href="/" class="back-link">← 返回首页</a>
     </div>
 
-    {% if overview %}
-    <div class="search-summary">
-        <h2>Summary</h2>
-        <p>{{ overview }}</p>
+    {% if overview and "未找到网页内容" not in overview and "摘要生成失败" not in overview %}
+    <div class="overview">
+        <h3>🔍 AI 概述</h3>
+        <div class="overview-content">
+            {{ overview|safe }}
+        </div>
     </div>
     {% endif %}
 
-    <h2>Search Results</h2>
-    {% for result in results %}
-    <div class="search-result" data-filename="{{ result.filename }}">
-        <h3>
-            <a href="{{ url_for('static', filename=result.filename) }}" target="_blank"
-               onclick="logClick('{{ uid }}', '{{ result.filename }}', '{{ query }}')">
-               {{ result.title }}
-            </a>
-        </h3>
-        <p>{{ result.preview }}</p>
+    <div class="results-container">
+        {% if results %}
+            <div class="stats">
+                找到 {{ results|length }} 个相关结果，搜索关键词："{{ query }}"
+            </div>
+            {% for result in results %}
+            <div class="result-item" onclick="logClick('{{ result.filename }}', {{ result.score }}); window.open('/webpages/{{ result.filename }}', '_blank');">
+                <div class="result-title">{{ result.title }}</div>
+                <div class="result-filename">
+                    <span>{{ result.filename }}</span>
+                    <span class="result-score">相似度: {{ "%.3f"|format(result.score) }}</span>
+                </div>
+                <div class="result-preview">{{ result.preview }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-results">
+                <h3>未找到相关结果</h3>
+                <p>请尝试使用不同的关键词搜索</p>
+            </div>
+        {% endif %}
     </div>
-    {% endfor %}
 
     <script>
         const uid = "{{ uid }}";
         const query = "{{ query }}";
         let startTime = Date.now();
+        let hasLoggedStay = false; // 防止重复记录
+        let heartbeatInterval;
 
-        function logClick(uid, target, query) {
+        function logClick(target, score) {
             fetch("/log_click", {
                 method: "POST",
                 headers: {
@@ -106,25 +210,68 @@
                     uid: uid,
                     target: target,
                     query: query,
+                    score: score || 0,
                     timestamp: new Date().toISOString()
                 })
             });
         }
 
-        window.addEventListener("beforeunload", function() {
+        function logStay() {
+            // 防止重复记录
+            if (hasLoggedStay) return;
+            
             const duration = Date.now() - startTime;
-            fetch("/log_stay", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    uid: uid,
-                    page: window.location.pathname,
-                    duration: duration,
-                    query: query
-                })
-            });
+            
+            // 只记录停留时间大于2秒的
+            if (duration < 2000) return;
+            
+            hasLoggedStay = true; // 标记已记录
+            
+            const data = {
+                uid: uid,
+                page: window.location.pathname,
+                duration: duration,
+                query: query,
+                timestamp: new Date().toISOString()
+            };
+
+            // 优先使用 sendBeacon
+            if (navigator.sendBeacon) {
+                const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+                navigator.sendBeacon("/log_stay", blob);
+            } else {
+                // 备用方法
+                fetch("/log_stay", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data),
+                    keepalive: true
+                });
+            }
+        }
+
+        // 只在页面真正离开时记录一次
+        let isUnloading = false;
+        
+        window.addEventListener("beforeunload", function() {
+            if (!isUnloading) {
+                isUnloading = true;
+                logStay();
+            }
+        });
+
+        // 页面隐藏时记录（比如切换标签页）
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden && !hasLoggedStay) {
+                logStay();
+            }
+        });
+
+        // 清理可能存在的定时器
+        window.addEventListener("load", function() {
+            startTime = Date.now();
         });
     </script>
 </body>

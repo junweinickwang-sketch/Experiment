@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .back-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            float: left;
+        }
+        .back-link:hover {
+            color: #4CAF50;
+        }
+        .users-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .users-header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .user-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        .user-item:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .username {
+            font-weight: bold;
+            color: #333;
+        }
+        .user-id {
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+        }
+        .user-stats {
+            color: #666;
+            font-size: 14px;
+        }
+        .user-date {
+            color: #999;
+            font-size: 13px;
+        }
+        .no-users {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .table-header {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            font-weight: bold;
+            color: #333;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-link">← 返回首页</a>
+        <h1>用户管理</h1>
+    </div>
+
+    <div class="users-container">
+        <div class="users-header">
+            注册用户列表 ({{ users|length }} 个用户)
+        </div>
+        
+        {% if users %}
+            <div class="table-header">
+                <div>用户信息</div>
+                <div>搜索次数</div>
+                <div>注册时间</div>
+                <div>最后活跃</div>
+            </div>
+            {% for uid, user in users.items() %}
+            <div class="user-item">
+                <div>
+                    <div class="username">{{ user.username }}</div>
+                    <div class="user-id">ID: {{ uid[:16] }}...</div>
+                </div>
+                <div class="user-stats">{{ user.search_count }} 次</div>
+                <div class="user-date">{{ user.created_at[:10] }}</div>
+                <div class="user-date">{{ user.last_active[:10] }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-users">
+                <h3>暂无用户数据</h3>
+                <p>用户首次访问时会自动创建账户</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/" style="color: #666; text-decoration: none;">← 返回首页</a>
+        <span style="margin: 0 20px; color: #ccc;">|</span>
+        <a href="/logs" style="color: #666; text-decoration: none;">查看日志</a>
+    </div>
+</body>
+</html>

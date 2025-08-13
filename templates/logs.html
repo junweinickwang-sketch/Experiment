@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作日志</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .back-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            float: left;
+        }
+        .back-link:hover {
+            color: #4CAF50;
+        }
+        .log-section {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .log-header {
+            background: #2196F3;
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .log-table th {
+            background: #f0f0f0;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+        .log-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .log-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .log-table tr:hover {
+            background-color: #f0f8ff;
+        }
+        .username {
+            font-weight: bold;
+            color: #333;
+        }
+        .timestamp {
+            color: #666;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .query {
+            background: #e3f2fd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #1976d2;
+        }
+        .target-link {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .target-link:hover {
+            text-decoration: underline;
+        }
+        .duration {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .stats-summary {
+            background: #fff3e0;
+            padding: 15px 20px;
+            border-left: 4px solid #ff9800;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-link">← 返回首页</a>
+        <h1>操作日志</h1>
+    </div>
+
+    <!-- 点击日志 -->
+    <div class="log-section">
+        <div class="log-header">
+            📊 点击日志 ({{ stats.total_clicks }} 条记录)
+        </div>
+        
+        {% if logs.clicks %}
+            <div class="stats-summary">
+                <strong>统计：</strong>
+                总点击数: {{ stats.total_clicks }}，
+                活跃用户: {{ stats.unique_users_clicks }}
+            </div>
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>用户</th>
+                        <th>点击目标</th>
+                        <th>搜索查询</th>
+                        <th>相似度</th>
+                        <th>时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for click in logs.clicks %}
+                    <tr>
+                        <td>
+                            <span class="username">{{ click.username }}</span>
+                            <br><small style="color: #999;">{{ click.uid[:8] }}...</small>
+                        </td>
+                        <td>
+                            <a href="/webpages/{{ click.target }}" target="_blank" class="target-link">
+                                {{ click.target }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if click.query %}
+                                <span class="query">{{ click.query }}</span>
+                            {% else %}
+                                <span style="color: #ccc;">无查询</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if click.score %}
+                                {{ "%.3f"|format(click.score|float) }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="timestamp">{{ click.timestamp[:19]|replace('T', ' ') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="no-logs">
+                <h3>暂无点击日志</h3>
+                <p>用户点击搜索结果时会记录在这里</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 停留日志 -->
+    <div class="log-section">
+        <div class="log-header">
+            ⏱️ 页面停留日志 ({{ stats.total_stays }} 条记录)
+        </div>
+        
+        <div class="stats-summary">
+            <strong>统计：</strong>
+            总访问数: {{ stats.total_stays }}，
+            内容页面访问: {{ stats.content_page_views }}，
+            平均停留时间: {{ stats.avg_stay_time }} 秒，
+            内容页面平均停留: {{ stats.avg_content_stay_time }} 秒
+        </div>
+
+        <!-- 内容页面停留 -->
+        {% if logs.stays.content_pages %}
+        <div style="background: #e8f5e8; padding: 10px; margin: 10px 0; border-radius: 5px;">
+            <h4 style="margin: 0; color: #2d5a2d;">📄 内容页面停留记录</h4>
+        </div>
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th>用户</th>
+                    <th>内容页面</th>
+                    <th>文件名</th>
+                    <th>停留时长</th>
+                    <th>访问时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stay in logs.stays.content_pages %}
+                <tr>
+                    <td>
+                        <span class="username">{{ stay.username }}</span>
+                        <br><small style="color: #999;">{{ stay.uid[:8] }}...</small>
+                    </td>
+                    <td>
+                        <a href="{{ stay.page }}" target="_blank" class="target-link">
+                            {{ stay.page.split('/')[-1] if stay.page.startswith('/webpages/') else stay.page }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if stay.webpage_filename %}
+                            <span style="font-family: monospace; font-size: 12px; color: #666;">
+                                {{ stay.webpage_filename }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="duration">{{ (stay.duration|int / 1000)|round(1) }}s</span>
+                    </td>
+                    <td class="timestamp">
+                        {% if stay.timestamp %}
+                            {{ stay.timestamp[:19]|replace('T', ' ') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <!-- 搜索页面停留 -->
+        {% if logs.stays.search_pages %}
+        <div style="background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+            <h4 style="margin: 0; color: #1976d2;">🔍 搜索页面停留记录</h4>
+        </div>
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th>用户</th>
+                    <th>页面</th>
+                    <th>搜索查询</th>
+                    <th>停留时长</th>
+                    <th>访问时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stay in logs.stays.search_pages %}
+                <tr>
+                    <td>
+                        <span class="username">{{ stay.username }}</span>
+                        <br><small style="color: #999;">{{ stay.uid[:8] }}...</small>
+                    </td>
+                    <td>{{ stay.page }}</td>
+                    <td>
+                        {% if stay.query %}
+                            <span class="query">{{ stay.query }}</span>
+                        {% else %}
+                            <span style="color: #ccc;">无查询</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="duration">{{ (stay.duration|int / 1000)|round(1) }}s</span>
+                    </td>
+                    <td class="timestamp">
+                        {% if stay.timestamp %}
+                            {{ stay.timestamp[:19]|replace('T', ' ') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <!-- 系统页面停留 -->
+        {% if logs.stays.system_pages %}
+        <div style="background: #fff3e0; padding: 10px; margin: 10px 0; border-radius: 5px;">
+            <h4 style="margin: 0; color: #f57c00;">⚙️ 系统页面停留记录</h4>
+        </div>
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th>用户</th>
+                    <th>页面</th>
+                    <th>停留时长</th>
+                    <th>访问时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stay in logs.stays.system_pages %}
+                <tr>
+                    <td>
+                        <span class="username">{{ stay.username }}</span>
+                        <br><small style="color: #999;">{{ stay.uid[:8] }}...</small>
+                    </td>
+                    <td>{{ stay.page }}</td>
+                    <td>
+                        <span class="duration">{{ (stay.duration|int / 1000)|round(1) }}s</span>
+                    </td>
+                    <td class="timestamp">
+                        {% if stay.timestamp %}
+                            {{ stay.timestamp[:19]|replace('T', ' ') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% if not logs.stays.content_pages and not logs.stays.search_pages and not logs.stays.system_pages %}
+            <div class="no-logs">
+                <h3>暂无停留日志</h3>
+                <p>用户访问页面的停留时间会记录在这里</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/" style="color: #666; text-decoration: none;">← 返回首页</a>
+        <span style="margin: 0 20px; color: #ccc;">|</span>
+        <a href="/users" style="color: #666; text-decoration: none;">用户管理</a>
+        <span style="margin: 0 20px; color: #ccc;">|</span>
+        <a href="/webpage_stats" style="color: #666; text-decoration: none;">网页统计</a>
+    </div>
+</body>
+</html>
