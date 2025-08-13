@@ -1,0 +1,98 @@
+[
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "player_behavior.html",
+    "query": "game",
+    "score": 0.40881747007369995,
+    "timestamp": "2025-08-13T11:06:49.737962"
+  },
+  {
+    "uid": "f517e2b9-7419-4e9a-8cd3-2a74ad1470c8",
+    "username": "用户2",
+    "target": "esports_industry.html",
+    "query": "wow",
+    "score": 0.10506173968315125,
+    "timestamp": "2025-08-13T11:08:04.296125"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "fps_history.html",
+    "query": "game",
+    "score": 0.41241222620010376,
+    "timestamp": "2025-08-13T11:11:26.621257"
+  },
+  {
+    "uid": "f517e2b9-7419-4e9a-8cd3-2a74ad1470c8",
+    "username": "用户2",
+    "target": "rhythm_games.html",
+    "query": "mobilegame",
+    "score": 0.5337967276573181,
+    "timestamp": "2025-08-13T11:12:22.848767"
+  },
+  {
+    "uid": "2a78f0ce-02ed-4495-81e5-9e35982ce452",
+    "username": "用户4",
+    "target": "esports_industry.html",
+    "query": "mobile",
+    "score": 0.3991103768348694,
+    "timestamp": "2025-08-13T11:14:27.779321"
+  },
+  {
+    "uid": "30c06b35-a458-44c9-bc05-a9a2e822fa0c",
+    "username": "用户5",
+    "target": "roguelike_addiction.html",
+    "query": "game00",
+    "score": 0.3104472756385803,
+    "timestamp": "2025-08-13T11:17:10.933121"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "player_behavior.html",
+    "query": "game3",
+    "score": 0.3918036222457886,
+    "timestamp": "2025-08-13T11:26:22.076350"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "mobile_vs_console.html",
+    "query": "game9",
+    "score": 0.3636026978492737,
+    "timestamp": "2025-08-13T11:35:43.917911"
+  },
+  {
+    "uid": "cf8224da-841f-4d13-9a08-dc66097add1d",
+    "username": "用户3",
+    "target": "fps_history.html",
+    "query": "game03",
+    "score": 0.3680770695209503,
+    "timestamp": "2025-08-13T11:36:40.532758"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "moral_choices.html",
+    "query": "game13",
+    "score": 0.33666571974754333,
+    "timestamp": "2025-08-13T11:43:08.260414"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "open_world_games.html",
+    "query": "game101",
+    "score": 0.32184654474258423,
+    "timestamp": "2025-08-13T11:49:30.537495"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "mmorpg_evolution.html",
+    "query": "game15",
+    "score": 0.3573101758956909,
+    "timestamp": "2025-08-13T12:00:59.964967"
+  }
+]

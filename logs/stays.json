@@ -1,0 +1,186 @@
+[
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 2515,
+    "query": "",
+    "timestamp": "2025-08-13T11:28:55.393014"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 7993,
+    "query": "",
+    "timestamp": "2025-08-13T11:35:34.335378"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/search",
+    "duration": 5684,
+    "query": "game9",
+    "timestamp": "2025-08-13T11:35:43.959128"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/",
+    "duration": 2926,
+    "query": "",
+    "timestamp": "2025-08-13T11:35:51.545456"
+  },
+  {
+    "uid": "cf8224da-841f-4d13-9a08-dc66097add1d",
+    "username": "用户3",
+    "page": "/search",
+    "duration": 1653914,
+    "query": "game1",
+    "timestamp": "2025-08-13T11:36:08.811683"
+  },
+  {
+    "uid": "cf8224da-841f-4d13-9a08-dc66097add1d",
+    "username": "用户3",
+    "page": "/",
+    "duration": 5274,
+    "query": "",
+    "timestamp": "2025-08-13T11:36:14.145624"
+  },
+  {
+    "uid": "cf8224da-841f-4d13-9a08-dc66097add1d",
+    "username": "用户3",
+    "page": "/search",
+    "duration": 4175,
+    "query": "game03",
+    "timestamp": "2025-08-13T11:36:40.570616"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 4927,
+    "query": "",
+    "timestamp": "2025-08-13T11:42:58.859217"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/search",
+    "duration": 4754,
+    "query": "game13",
+    "timestamp": "2025-08-13T11:43:08.311824"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 3152,
+    "query": "",
+    "timestamp": "2025-08-13T11:49:13.439243"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/search",
+    "duration": 3649,
+    "query": "game101",
+    "timestamp": "2025-08-13T11:49:30.573728"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 1693,
+    "query": "",
+    "timestamp": "2025-08-13T11:49:38.863534"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 2030,
+    "query": "",
+    "timestamp": "2025-08-13T11:56:05.743163"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 6164,
+    "query": "",
+    "timestamp": "2025-08-13T12:00:54.644630"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/search",
+    "duration": 8468,
+    "query": "game15",
+    "timestamp": "2025-08-13T12:01:06.593613"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 1313,
+    "query": "",
+    "timestamp": "2025-08-13T12:01:07.995041"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 3494,
+    "query": "",
+    "timestamp": "2025-08-13T13:24:42.311150"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/search",
+    "duration": 6107,
+    "query": "wow1",
+    "timestamp": "2025-08-13T13:24:51.380666"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 1784,
+    "query": "",
+    "timestamp": "2025-08-13T13:24:53.270559"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 1117,
+    "query": "",
+    "timestamp": "2025-08-13T13:24:58.345902"
+  },
+  {
+    "uid": "cf8224da-841f-4d13-9a08-dc66097add1d",
+    "username": "用户3",
+    "page": "/",
+    "duration": 7613,
+    "query": "",
+    "timestamp": "2025-08-13T13:29:31.563023"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/webpages/mmorpg_evolution.html",
+    "duration": 4122,
+    "query": "webpage_view",
+    "timestamp": "2025-08-13T13:31:37.777183"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/webpages/open_world_games.html",
+    "duration": 6263,
+    "query": "webpage_view",
+    "timestamp": "2025-08-13T13:31:39.643864"
+  }
+]
