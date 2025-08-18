@@ -184,8 +184,40 @@ def log_stay(uid, username, page, duration, query=""):
         except Exception as e:
             print(f"保存停留日志失败: {e}")
 
+def log_scroll(uid, username, page, event_type, scroll_percentage, total_scroll_events, time_to_reach, webpage_filename=""):
+    """记录滚动事件"""
+    with file_locks['stays']:  # 复用stays的锁
+        log_entry = {
+            "uid": uid,
+            "username": username,
+            "page": page,
+            "event_type": event_type,
+            "scroll_percentage": scroll_percentage,
+            "total_scroll_events": total_scroll_events,
+            "time_to_reach": time_to_reach,
+            "webpage_filename": webpage_filename,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        log_file = os.path.join(LOGS_DIR, "scrolls.json")
+        logs = []
+        if os.path.exists(log_file):
+            try:
+                with open(log_file, "r", encoding="utf-8") as f:
+                    logs = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                logs = []
+        
+        logs.append(log_entry)
+        
+        try:
+            with open(log_file, "w", encoding="utf-8") as f:
+                json.dump(logs, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"保存滚动日志失败: {e}")
+
 def load_logs():
-    logs = {"clicks": [], "stays": []}
+    logs = {"clicks": [], "stays": [], "scrolls": []}
     
     # 加载点击日志
     with file_locks['clicks']:
@@ -206,6 +238,16 @@ def load_logs():
                     logs["stays"] = json.load(f)
             except (json.JSONDecodeError, FileNotFoundError):
                 logs["stays"] = []
+    
+    # 加载滚动日志
+    with file_locks['stays']:  # 复用stays的锁
+        scroll_file = os.path.join(LOGS_DIR, "scrolls.json")
+        if os.path.exists(scroll_file):
+            try:
+                with open(scroll_file, "r", encoding="utf-8") as f:
+                    logs["scrolls"] = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                logs["scrolls"] = []
     
     return logs
 
@@ -325,9 +367,9 @@ def serve_webpage(filename):
         # 确保文件名安全
         safe_filename = filename.replace('"', '\\"').replace("'", "\\'")
         
-        # 创建更强大的追踪脚本
+        # 创建更强大的追踪脚本，包含滚动跟踪
         tracking_script = f'''
-<!-- 停留时间追踪脚本 -->
+<!-- 停留时间和滚动跟踪脚本 -->
 <script>
 (function() {{
     const uid = "{uid}";
@@ -337,6 +379,92 @@ def serve_webpage(filename):
     let lastVisibleStart = Date.now();
     let isPageVisible = !document.hidden;
     let hasLoggedStay = false;
+    
+    // 滚动跟踪变量
+    let maxScrollPercentage = 0;
+    let scrollMilestones = {{5: false, 10: false, 25: false, 50: false, 75: false, 90: false, 100: false}};
+    let lastScrollTime = Date.now();
+    let totalScrollEvents = 0;
+    let scrollStartTime = null;
+    let totalScrollTime = 0;
+
+    function calculateScrollPercentage() {{
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (documentHeight <= windowHeight) {{
+            return 100; // 如果页面内容不足一屏，算作100%
+        }}
+        
+        const maxScroll = documentHeight - windowHeight;
+        const percentage = Math.round((scrollTop / maxScroll) * 100);
+        return Math.min(100, Math.max(0, percentage));
+    }}
+
+    function logScrollMilestone(percentage) {{
+        const data = {{
+            uid: uid,
+            page: "/webpages/" + filename,
+            event_type: "scroll_milestone",
+            scroll_percentage: percentage,
+            timestamp: new Date().toISOString(),
+            webpage_filename: filename,
+            total_scroll_events: totalScrollEvents,
+            time_to_reach: Date.now() - startTime
+        }};
+
+        console.log("记录滚动里程碑:", percentage + "%");
+
+        fetch("/log_scroll", {{
+            method: "POST",
+            headers: {{ "Content-Type": "application/json" }},
+            body: JSON.stringify(data),
+            keepalive: true
+        }}).catch(error => {{
+            console.error("记录滚动里程碑失败:", error);
+        }});
+    }}
+
+    function handleScroll() {{
+        if (!isPageVisible) return; // 只在页面可见时记录滚动
+        
+        const currentPercentage = calculateScrollPercentage();
+        totalScrollEvents++;
+        lastScrollTime = Date.now();
+        
+        // 开始滚动计时
+        if (scrollStartTime === null) {{
+            scrollStartTime = Date.now();
+        }}
+        
+        // 更新最大滚动百分比
+        if (currentPercentage > maxScrollPercentage) {{
+            maxScrollPercentage = currentPercentage;
+        }}
+        
+        // 检查是否达到新的里程碑
+        for (let milestone in scrollMilestones) {{
+            const milestoneNum = parseInt(milestone);
+            if (currentPercentage >= milestoneNum && !scrollMilestones[milestone]) {{
+                scrollMilestones[milestone] = true;
+                logScrollMilestone(milestoneNum);
+            }}
+        }}
+    }}
+
+    // 防抖滚动事件
+    let scrollTimeout;
+    function debouncedScrollHandler() {{
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {{
+            handleScroll();
+            // 更新总滚动时间
+            if (scrollStartTime) {{
+                totalScrollTime = Date.now() - scrollStartTime;
+            }}
+        }}, 100);
+    }}
 
     function updateVisibleTime() {{
         if (isPageVisible) {{
@@ -361,10 +489,15 @@ def serve_webpage(filename):
             duration: totalVisibleTime,
             query: "webpage_view",
             timestamp: new Date().toISOString(),
-            webpage_filename: filename
+            webpage_filename: filename,
+            // 滚动数据
+            max_scroll_percentage: maxScrollPercentage,
+            reached_milestones: Object.keys(scrollMilestones).filter(m => scrollMilestones[m]).map(Number),
+            total_scroll_events: totalScrollEvents,
+            total_scroll_time: totalScrollTime
         }};
 
-        console.log("记录网页停留:", data);
+        console.log("记录网页停留（含滚动数据）:", data);
 
         if (navigator.sendBeacon) {{
             const blob = new Blob([JSON.stringify(data)], {{type: 'application/json'}});
@@ -399,6 +532,8 @@ def serve_webpage(filename):
                 lastVisibleStart = now;
                 isPageVisible = true;
                 console.log("页面显示，重新开始计时");
+                // 重新开始滚动计时
+                scrollStartTime = Date.now();
             }}
         }}
     }});
@@ -409,6 +544,7 @@ def serve_webpage(filename):
             lastVisibleStart = Date.now();
             isPageVisible = true;
             console.log("窗口获得焦点");
+            scrollStartTime = Date.now();
         }}
     }});
 
@@ -420,6 +556,9 @@ def serve_webpage(filename):
         }}
     }});
 
+    // 滚动事件监听
+    window.addEventListener("scroll", debouncedScrollHandler, {{ passive: true }});
+
     // 页面卸载时记录停留时间
     let isUnloading = false;
     
@@ -427,7 +566,7 @@ def serve_webpage(filename):
         if (!isUnloading) {{
             isUnloading = true;
             updateVisibleTime();
-            console.log("页面卸载，最终可见时间:", totalVisibleTime/1000, "秒");
+            console.log("页面卸载，最终可见时间:", totalVisibleTime/1000, "秒, 最大滚动:", maxScrollPercentage + "%");
             logWebpageStay();
         }}
     }}
@@ -440,7 +579,17 @@ def serve_webpage(filename):
         startTime = Date.now();
         lastVisibleStart = Date.now();
         isPageVisible = !document.hidden;
+        scrollStartTime = Date.now();
+        
         console.log("网页追踪初始化完成:", filename);
+        
+        // 初始滚动位置检查
+        setTimeout(() => {{
+            const initialScroll = calculateScrollPercentage();
+            if (initialScroll > 0) {{
+                handleScroll();
+            }}
+        }}, 500);
         
         // 测试连接
         fetch("/log_stay", {{
@@ -473,18 +622,26 @@ def serve_webpage(filename):
         const debugDiv = document.createElement('div');
         debugDiv.style.cssText = `
             position: fixed; top: 10px; right: 10px; 
-            background: rgba(0,0,0,0.8); color: white; 
-            padding: 10px; border-radius: 5px; font-size: 12px;
-            z-index: 9999; font-family: monospace; min-width: 200px;
+            background: rgba(0,0,0,0.9); color: white; 
+            padding: 15px; border-radius: 8px; font-size: 12px;
+            z-index: 9999; font-family: monospace; min-width: 250px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         `;
         document.body.appendChild(debugDiv);
         
         setInterval(() => {{
             updateVisibleTime();
+            const currentScroll = calculateScrollPercentage();
+            const reachedMilestones = Object.keys(scrollMilestones).filter(m => scrollMilestones[m]).join(', ');
+            
             debugDiv.innerHTML = `
                 📄 文件: ${{filename}}<br>
                 👁️ 状态: ${{isPageVisible ? '可见' : '隐藏'}}<br>
                 ⏱️ 可见时间: ${{(totalVisibleTime/1000).toFixed(1)}}秒<br>
+                📊 当前滚动: ${{currentScroll}}%<br>
+                🏆 最大滚动: ${{maxScrollPercentage}}%<br>
+                🎯 达成里程碑: ${{reachedMilestones || '无'}}<br>
+                🖱️ 滚动次数: ${{totalScrollEvents}}<br>
                 🔄 已记录: ${{hasLoggedStay ? '是' : '否'}}
             `;
         }}, 100);
@@ -629,8 +786,52 @@ def log_stay_endpoint():
     
     return "", 204
 
-@app.route("/users")
-def users():
+@app.route("/log_scroll", methods=["POST"])
+def log_scroll_endpoint():
+    """处理滚动里程碑记录"""
+    if request.is_json:
+        data = request.get_json()
+    else:
+        try:
+            data = json.loads(request.data.decode('utf-8'))
+        except:
+            return "", 400
+    
+    uid = data.get("uid")
+    
+    # 确保用户存在
+    if not uid:
+        return "", 400
+    
+    users = load_users()
+    if uid not in users:
+        username = f"用户{len(users) + 1}"
+        users[uid] = {
+            "username": username,
+            "created_at": datetime.now().isoformat(),
+            "last_active": datetime.now().isoformat(),
+            "search_count": 0
+        }
+        save_users(users)
+    
+    username = users[uid]["username"]
+    
+    log_scroll(
+        uid=uid,
+        username=username,
+        page=data.get("page", ""),
+        event_type=data.get("event_type", "scroll_milestone"),
+        scroll_percentage=data.get("scroll_percentage", 0),
+        total_scroll_events=data.get("total_scroll_events", 0),
+        time_to_reach=data.get("time_to_reach", 0),
+        webpage_filename=data.get("webpage_filename", "")
+    )
+    
+    webpage_filename = data.get("webpage_filename", "未知")
+    scroll_percentage = data.get("scroll_percentage", 0)
+    print(f"📊 记录滚动里程碑: 用户={username}, 网页={webpage_filename}, 滚动到={scroll_percentage}%")
+    
+    return "", 204
     uid, user = get_or_create_user(request)
     users_data = load_users()
     
@@ -645,6 +846,7 @@ def logs():
     # 分类日志数据
     categorized_logs = {
         "clicks": logs_data["clicks"],
+        "scrolls": logs_data["scrolls"],
         "stays": {
             "search_pages": [],      # 搜索相关页面 (/, /search)
             "system_pages": [],      # 系统页面 (/logs, /users, /test, /debug)
@@ -666,6 +868,7 @@ def logs():
     stats = {
         "total_clicks": len(logs_data["clicks"]),
         "total_stays": len(logs_data["stays"]),
+        "total_scrolls": len(logs_data["scrolls"]),
         "content_page_views": len(categorized_logs["stays"]["content_pages"]),
         "unique_users_clicks": len(set(click.get("username", "") for click in logs_data["clicks"])),
         "avg_stay_time": 0,
@@ -680,9 +883,10 @@ def logs():
         content_duration = sum(int(stay.get("duration", 0)) for stay in categorized_logs["stays"]["content_pages"])
         stats["avg_content_stay_time"] = round(content_duration / len(categorized_logs["stays"]["content_pages"]) / 1000, 1)
     
-    # 只取最近50条记录
+    # 只取最近的记录
     recent_logs = {
         "clicks": logs_data["clicks"][-50:],
+        "scrolls": logs_data["scrolls"][-30:],  # 滚动日志
         "stays": {
             "search_pages": categorized_logs["stays"]["search_pages"][-20:],
             "system_pages": categorized_logs["stays"]["system_pages"][-20:],
@@ -701,6 +905,8 @@ def webpage_stats():
     
     # 统计每个网页的访问情况
     webpage_stats = {}
+    
+    # 处理停留日志
     for stay in logs_data["stays"]:
         page = stay.get("page", "")
         if page.startswith("/webpages/"):
@@ -712,18 +918,49 @@ def webpage_stats():
                     "total_visits": 0,
                     "total_time": 0,
                     "unique_users": set(),
-                    "avg_time": 0
+                    "avg_time": 0,
+                    "max_scroll_avg": 0,
+                    "scroll_data": [],
+                    "milestone_stats": {25: 0, 50: 0, 75: 0, 90: 0, 100: 0}
                 }
             
             webpage_stats[filename]["total_visits"] += 1
             webpage_stats[filename]["total_time"] += int(stay.get("duration", 0))
             webpage_stats[filename]["unique_users"].add(stay.get("username", ""))
+            
+            # 滚动数据
+            max_scroll = stay.get("max_scroll_percentage", 0)
+            if max_scroll > 0:
+                webpage_stats[filename]["scroll_data"].append(max_scroll)
+            
+            # 里程碑统计
+            milestones = stay.get("reached_milestones", [])
+            for milestone in milestones:
+                if milestone in webpage_stats[filename]["milestone_stats"]:
+                    webpage_stats[filename]["milestone_stats"][milestone] += 1
     
-    # 计算平均时间和转换用户集合为数量
+    # 处理滚动日志
+    for scroll in logs_data["scrolls"]:
+        webpage_filename = scroll.get("webpage_filename", "")
+        if webpage_filename and webpage_filename in webpage_stats:
+            # 滚动里程碑已经在停留日志中处理了，这里可以添加额外的滚动分析
+            pass
+    
+    # 计算平均时间、滚动数据等
     for filename, stats in webpage_stats.items():
         if stats["total_visits"] > 0:
             stats["avg_time"] = round(stats["total_time"] / stats["total_visits"] / 1000, 1)
+        
+        if stats["scroll_data"]:
+            stats["max_scroll_avg"] = round(sum(stats["scroll_data"]) / len(stats["scroll_data"]), 1)
+        
         stats["unique_users"] = len(stats["unique_users"])
+        
+        # 计算阅读完成率（滚动到90%以上的比例）
+        stats["completion_rate"] = 0
+        if stats["total_visits"] > 0:
+            completed = stats["milestone_stats"].get(90, 0)
+            stats["completion_rate"] = round((completed / stats["total_visits"]) * 100, 1)
     
     # 按总访问时间排序
     sorted_stats = sorted(webpage_stats.values(), key=lambda x: x["total_time"], reverse=True)
@@ -736,14 +973,14 @@ def webpage_stats():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>网页访问统计</title>
         <style>
-            body {{ font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }}
+            body {{ font-family: Arial, sans-serif; max-width: 1400px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }}
             .header {{ background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }}
             .back-link {{ color: #666; text-decoration: none; font-size: 14px; float: left; }}
             .back-link:hover {{ color: #4CAF50; }}
             .stats-container {{ background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
             .stats-header {{ background: #4CAF50; color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; }}
             .stats-table {{ width: 100%; border-collapse: collapse; }}
-            .stats-table th {{ background: #f0f0f0; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }}
+            .stats-table th {{ background: #f0f0f0; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; font-size: 13px; }}
             .stats-table td {{ padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 14px; }}
             .stats-table tr:nth-child(even) {{ background-color: #f9f9f9; }}
             .stats-table tr:hover {{ background-color: #f0f8ff; }}
@@ -751,6 +988,18 @@ def webpage_stats():
             .title {{ font-weight: bold; color: #333; }}
             .time-bar {{ background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; }}
             .time-fill {{ background: #4CAF50; height: 100%; }}
+            .scroll-bar {{ background: #e0e0e0; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 2px; }}
+            .scroll-fill {{ background: #2196F3; height: 100%; }}
+            .milestone-badges {{ display: flex; gap: 2px; flex-wrap: wrap; }}
+            .milestone-badge {{ 
+                background: #f0f0f0; color: #666; padding: 1px 4px; border-radius: 3px; 
+                font-size: 10px; font-weight: bold; 
+            }}
+            .milestone-badge.reached {{ background: #4CAF50; color: white; }}
+            .completion-rate {{ 
+                padding: 2px 6px; border-radius: 8px; font-size: 11px; font-weight: bold;
+                color: white;
+            }}
             .no-data {{ text-align: center; padding: 40px; color: #666; }}
         </style>
     </head>
@@ -765,7 +1014,7 @@ def webpage_stats():
                 📊 内容页面访问统计 (共 {len(sorted_stats)} 个页面)
             </div>
             
-            {generate_stats_table(sorted_stats)}
+            {generate_enhanced_stats_table(sorted_stats)}
         </div>
 
         <div style="text-align: center; margin-top: 20px;">
@@ -779,7 +1028,7 @@ def webpage_stats():
     
     return stats_html
 
-def generate_stats_table(sorted_stats):
+def generate_enhanced_stats_table(sorted_stats):
     if not sorted_stats:
         return '<div class="no-data"><h3>暂无网页访问数据</h3><p>用户访问内容页面时会显示统计信息</p></div>'
     
@@ -791,11 +1040,13 @@ def generate_stats_table(sorted_stats):
             <tr>
                 <th>排名</th>
                 <th>页面标题</th>
-                <th>文件名</th>
-                <th>总访问次数</th>
+                <th>访问次数</th>
                 <th>独立用户</th>
                 <th>总停留时间</th>
-                <th>平均停留时间</th>
+                <th>平均停留</th>
+                <th>平均滚动深度</th>
+                <th>阅读完成率</th>
+                <th>滚动里程碑</th>
                 <th>热度</th>
             </tr>
         </thead>
@@ -804,19 +1055,52 @@ def generate_stats_table(sorted_stats):
     
     for i, stats in enumerate(sorted_stats, 1):
         fill_width = (stats["total_time"] / max_time) * 100 if max_time > 0 else 0
+        scroll_fill_width = stats["max_scroll_avg"] if stats["max_scroll_avg"] > 0 else 0
+        
+        # 完成率颜色
+        completion_rate = stats["completion_rate"]
+        if completion_rate >= 70:
+            completion_color = "#4CAF50"
+        elif completion_rate >= 40:
+            completion_color = "#FF9800"
+        else:
+            completion_color = "#F44336"
+        
+        # 里程碑徽章
+        milestone_badges = ""
+        for milestone, count in stats["milestone_stats"].items():
+            if milestone in [25, 50, 75, 90, 100]:
+                badge_class = "reached" if count > 0 else ""
+                milestone_badges += f'<span class="milestone-badge {badge_class}">{milestone}%({count})</span>'
         
         table_html += f'''
             <tr>
                 <td>{i}</td>
                 <td>
                     <div class="title">{stats["title"]}</div>
+                    <div class="filename">{stats["filename"]}</div>
                     <a href="/webpages/{stats["filename"]}" target="_blank" style="color: #4CAF50; text-decoration: none; font-size: 12px;">查看页面</a>
                 </td>
-                <td><span class="filename">{stats["filename"]}</span></td>
                 <td>{stats["total_visits"]}</td>
                 <td>{stats["unique_users"]}</td>
                 <td>{round(stats["total_time"]/1000, 1)}秒</td>
                 <td>{stats["avg_time"]}秒</td>
+                <td>
+                    {stats["max_scroll_avg"]}%
+                    <div class="scroll-bar">
+                        <div class="scroll-fill" style="width: {scroll_fill_width}%;"></div>
+                    </div>
+                </td>
+                <td>
+                    <span class="completion-rate" style="background: {completion_color};">
+                        {completion_rate}%
+                    </span>
+                </td>
+                <td>
+                    <div class="milestone-badges">
+                        {milestone_badges}
+                    </div>
+                </td>
                 <td>
                     <div class="time-bar">
                         <div class="time-fill" style="width: {fill_width}%;"></div>
