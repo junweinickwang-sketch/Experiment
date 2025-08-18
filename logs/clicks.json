@@ -94,5 +94,45 @@
     "query": "game15",
     "score": 0.3573101758956909,
     "timestamp": "2025-08-13T12:00:59.964967"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "target": "ai_in_games.html",
+    "query": "all in game",
+    "score": 0.24436578154563904,
+    "timestamp": "2025-08-15T12:24:07.778905"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "target": "vr_future.html",
+    "query": "game all in",
+    "score": 0.282751202583313,
+    "timestamp": "2025-08-15T12:27:25.720888"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "target": "game_engines.html",
+    "query": "The Role of AI in Modern Video Games",
+    "score": 0.659852147102356,
+    "timestamp": "2025-08-15T12:36:58.219109"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "target": "game_page_6.html",
+    "query": "game",
+    "score": 0.31978175044059753,
+    "timestamp": "2025-08-15T12:40:42.428714"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "target": "game_page_16.html",
+    "query": "game",
+    "score": 0.26612845063209534,
+    "timestamp": "2025-08-15T12:40:49.248590"
   }
 ]

@@ -182,5 +182,189 @@
     "duration": 6263,
     "query": "webpage_view",
     "timestamp": "2025-08-13T13:31:39.643864"
+  },
+  {
+    "uid": "f517e2b9-7419-4e9a-8cd3-2a74ad1470c8",
+    "username": "用户2",
+    "page": "/",
+    "duration": 11389845,
+    "query": "",
+    "timestamp": "2025-08-13T14:23:18.770381"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 4744,
+    "query": "",
+    "timestamp": "2025-08-15T12:23:40.613578"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/search",
+    "duration": 17396,
+    "query": "all in game",
+    "timestamp": "2025-08-15T12:24:01.860171"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/",
+    "duration": 1639,
+    "query": "",
+    "timestamp": "2025-08-15T12:24:18.769197"
+  },
+  {
+    "uid": "b2138109-b927-455d-9f48-6637635d2a20",
+    "username": "用户1",
+    "page": "/webpages/ai_in_games.html",
+    "duration": 6666,
+    "query": "webpage_view",
+    "timestamp": "2025-08-15T12:27:09.700158"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/",
+    "duration": 4874,
+    "query": "",
+    "timestamp": "2025-08-15T12:27:14.592529"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 5895,
+    "query": "game all in",
+    "timestamp": "2025-08-15T12:27:25.801125"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/",
+    "duration": 4329,
+    "query": "",
+    "timestamp": "2025-08-15T12:30:51.545420"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/webpages/vr_future.html",
+    "duration": 8107,
+    "query": "webpage_view",
+    "timestamp": "2025-08-15T12:31:22.388120"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/",
+    "duration": 4818,
+    "query": "",
+    "timestamp": "2025-08-15T12:31:27.233884"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 15351,
+    "query": "all in games",
+    "timestamp": "2025-08-15T12:31:46.243744"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 13242,
+    "query": "Game developers are constantly exploring new mechanics",
+    "timestamp": "2025-08-15T12:32:25.377029"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 20052,
+    "query": "The Evolution of Interactive Entertainment",
+    "timestamp": "2025-08-15T12:33:01.657511"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 22525,
+    "query": "The Role of AI in Modern Video Games",
+    "timestamp": "2025-08-15T12:33:41.268402"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 17597,
+    "query": "The landscape of video gaming has undergone a profound transformation over the past decade, evolving from simple interactive entertainment into complex digital ecosystems that challenge our understanding of artificial intelligence",
+    "timestamp": "2025-08-15T12:34:32.117556"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/",
+    "duration": 3294,
+    "query": "",
+    "timestamp": "2025-08-15T12:36:14.204364"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 10048,
+    "query": "all in games",
+    "timestamp": "2025-08-15T12:36:28.172815"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 9336,
+    "query": "The Role of AI in Modern Video Games",
+    "timestamp": "2025-08-15T12:36:58.253927"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/",
+    "duration": 3321,
+    "query": "",
+    "timestamp": "2025-08-15T12:40:34.669998"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/webpages/game_page_6.html",
+    "duration": 5441,
+    "query": "webpage_view",
+    "timestamp": "2025-08-15T12:40:47.998871"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/search",
+    "duration": 8632,
+    "query": "game",
+    "timestamp": "2025-08-15T12:40:49.284339"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/webpages/game_page_16.html",
+    "duration": 12995,
+    "query": "webpage_view",
+    "timestamp": "2025-08-15T12:41:02.339718"
+  },
+  {
+    "uid": "2f2a9808-51a7-4424-8893-530941d2d6a7",
+    "username": "用户6",
+    "page": "/webpages/game_engines.html",
+    "duration": 12577,
+    "query": "webpage_view",
+    "timestamp": "2025-08-17T13:52:33.109486"
   }
 ]
