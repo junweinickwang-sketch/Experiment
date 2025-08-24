@@ -1,204 +1,307 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>搜索结果 - {{ query }}</title>
+    <title>Search Results - {{ query }}</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .user-info {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .search-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .back-link {
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .back-link:hover {
-            color: #4CAF50;
-        }
-        .overview {
-            background: #e8f5e8;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #4CAF50;
-            line-height: 1.6;
-        }
-        .overview h3 {
-            margin-top: 0;
-            color: #2d5a2d;
-        }
-        .overview-content {
-            color: #333;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        /* Citation 样式 */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+        
+        .search-form {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #ffffff;
+        }
+        
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-button {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .overview {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .overview h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .overview-content {
+            color: #4a5568;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        
         .citation {
             display: inline;
             margin-left: 2px;
         }
+        
         .citation-link {
-            color: #1a73e8;
+            color: #667eea;
             text-decoration: none;
             font-size: 13px;
-            padding: 2px 4px;
-            background-color: rgba(26, 115, 232, 0.1);
-            border-radius: 3px;
-            margin: 0 1px;
+            padding: 2px 6px;
+            background-color: rgba(102, 126, 234, 0.1);
+            border-radius: 6px;
+            margin: 0 2px;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
+        
         .citation-link:hover {
-            background-color: rgba(26, 115, 232, 0.2);
-            text-decoration: underline;
+            background-color: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .results-header {
+            margin-bottom: 30px;
+        }
+        
+        .results-stats {
+            color: #718096;
+            font-size: 15px;
+            margin-bottom: 20px;
         }
         
         .results-container {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: grid;
+            gap: 20px;
         }
+        
         .result-item {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
-        .result-item:last-child {
-            border-bottom: none;
-        }
+        
         .result-item:hover {
-            background-color: #f9f9f9;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border-color: rgba(102, 126, 234, 0.3);
         }
+        
         .result-title {
-            color: #1a0dab;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .result-filename {
-            color: #006621;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .result-score {
-            background-color: #f0f0f0;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #666;
-        }
-        .result-preview {
-            color: #666;
+            color: #2d3748;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
             line-height: 1.4;
         }
+        
+        .result-meta {
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .result-filename {
+            color: #667eea;
+            font-weight: 500;
+        }
+        
+        .result-preview {
+            color: #718096;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+        
         .no-results {
             text-align: center;
-            padding: 40px;
-            color: #666;
+            padding: 80px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .stats {
-            color: #666;
-            font-size: 14px;
+        
+        .no-results h3 {
+            color: #4a5568;
+            font-size: 1.5rem;
             margin-bottom: 15px;
+        }
+        
+        .no-results p {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .search-form {
+                max-width: 100%;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .overview, .result-item {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="user-info">
-            <strong>当前用户：</strong>{{ user.username }} | 
-            <strong>搜索次数：</strong>{{ user.search_count }}
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">Search Hub</a>
+            <form class="search-form" action="/search" method="POST">
+                <input 
+                    type="text" 
+                    name="query" 
+                    value="{{ query }}" 
+                    class="search-input"
+                    placeholder="Search articles..." 
+                    required
+                >
+                <button type="submit" class="search-button">Search</button>
+            </form>
         </div>
-        
-        <form class="search-form" action="/search" method="POST">
-            <input type="text" name="query" value="{{ query }}" placeholder="输入搜索关键词..." required>
-            <button type="submit">搜索</button>
-        </form>
-        <a href="/" class="back-link">← 返回首页</a>
-    </div>
+    </header>
 
-    {% if overview and "未找到网页内容" not in overview and "摘要生成失败" not in overview %}
-    <div class="overview">
-        <h3>🔍 AI 概述</h3>
-        <div class="overview-content">
-            {{ overview|safe }}
+    <div class="container">
+        {% if overview and "No webpage content found" not in overview and "Summary generation failed" not in overview %}
+        <div class="overview">
+            <h3>🔍 AI Summary</h3>
+            <div class="overview-content">
+                {{ overview|safe }}
+            </div>
         </div>
-    </div>
-    {% endif %}
-
-    <div class="results-container">
-        {% if results %}
-            <div class="stats">
-                找到 {{ results|length }} 个相关结果，搜索关键词："{{ query }}"
-            </div>
-            {% for result in results %}
-            <div class="result-item" onclick="logClick('{{ result.filename }}', {{ result.score }}); window.open('/webpages/{{ result.filename }}', '_blank');">
-                <div class="result-title">{{ result.title }}</div>
-                <div class="result-filename">
-                    <span>{{ result.filename }}</span>
-                    <span class="result-score">相似度: {{ "%.3f"|format(result.score) }}</span>
-                </div>
-                <div class="result-preview">{{ result.preview }}</div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-results">
-                <h3>未找到相关结果</h3>
-                <p>请尝试使用不同的关键词搜索</p>
-            </div>
         {% endif %}
+
+        <div class="results-header">
+            {% if results %}
+                <div class="results-stats">
+                    Found {{ results|length }} relevant articles for "{{ query }}"
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="results-container">
+            {% if results %}
+                {% for result in results %}
+                <div class="result-item" onclick="logClick('{{ result.filename }}', {{ result.score }}); window.open('/webpages/{{ result.filename }}', '_blank');">
+                    <div class="result-title">{{ result.title }}</div>
+                    <div class="result-meta">
+                        <span class="result-filename">{{ result.filename }}</span>
+                    </div>
+                    <div class="result-preview">{{ result.preview }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-results">
+                    <h3>No results found</h3>
+                    <p>Try searching with different keywords or check your spelling</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
     <script>
         const uid = "{{ uid }}";
         const query = "{{ query }}";
         let startTime = Date.now();
-        let hasLoggedStay = false; // 防止重复记录
-        let heartbeatInterval;
+        let totalVisibleTime = 0;
+        let lastVisibleStart = Date.now();
+        let isPageVisible = !document.hidden;
+        let hasLoggedStay = false;
 
         function logClick(target, score) {
             fetch("/log_click", {
@@ -216,31 +319,35 @@
             });
         }
 
+        function updateVisibleTime() {
+            if (isPageVisible) {
+                const now = Date.now();
+                totalVisibleTime += (now - lastVisibleStart);
+                lastVisibleStart = now;
+            }
+        }
+
         function logStay() {
-            // 防止重复记录
             if (hasLoggedStay) return;
             
-            const duration = Date.now() - startTime;
+            updateVisibleTime();
             
-            // 只记录停留时间大于2秒的
-            if (duration < 2000) return;
+            if (totalVisibleTime < 1000) return;
             
-            hasLoggedStay = true; // 标记已记录
+            hasLoggedStay = true;
             
             const data = {
                 uid: uid,
                 page: window.location.pathname,
-                duration: duration,
+                duration: totalVisibleTime,
                 query: query,
                 timestamp: new Date().toISOString()
             };
 
-            // 优先使用 sendBeacon
             if (navigator.sendBeacon) {
                 const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
                 navigator.sendBeacon("/log_stay", blob);
             } else {
-                // 备用方法
                 fetch("/log_stay", {
                     method: "POST",
                     headers: {
@@ -252,7 +359,36 @@
             }
         }
 
-        // 只在页面真正离开时记录一次
+        document.addEventListener("visibilitychange", function() {
+            const now = Date.now();
+            
+            if (document.hidden) {
+                if (isPageVisible) {
+                    totalVisibleTime += (now - lastVisibleStart);
+                    isPageVisible = false;
+                }
+            } else {
+                if (!isPageVisible) {
+                    lastVisibleStart = now;
+                    isPageVisible = true;
+                }
+            }
+        });
+
+        window.addEventListener("focus", function() {
+            if (!isPageVisible && !document.hidden) {
+                lastVisibleStart = Date.now();
+                isPageVisible = true;
+            }
+        });
+
+        window.addEventListener("blur", function() {
+            if (isPageVisible) {
+                totalVisibleTime += (Date.now() - lastVisibleStart);
+                isPageVisible = false;
+            }
+        });
+
         let isUnloading = false;
         
         window.addEventListener("beforeunload", function() {
@@ -262,16 +398,10 @@
             }
         });
 
-        // 页面隐藏时记录（比如切换标签页）
-        document.addEventListener("visibilitychange", function() {
-            if (document.hidden && !hasLoggedStay) {
-                logStay();
-            }
-        });
-
-        // 清理可能存在的定时器
         window.addEventListener("load", function() {
             startTime = Date.now();
+            lastVisibleStart = Date.now();
+            isPageVisible = !document.hidden;
         });
     </script>
 </body>
